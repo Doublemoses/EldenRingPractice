@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ashofwar.erd" />
+    <EmbeddedResource Include="items.erd" />
+    <EmbeddedResource Include="graces.erd" />
+    <EmbeddedResource Include="flags.erd" />
+    <EmbeddedResource Include="hotkeysettings.erd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tomlyn" Version="0.18.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,263 @@
+﻿<Window x:Class="EldenRingPractice.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EldenRingPractice"
+        mc:Ignorable="d"
+        Title="Elden Ring Practice Tool" Height="514" Width="483" ResizeMode="CanMinimize">
+    <Grid Margin="0,0,0,6">
+        <TabControl x:Name="tabBase" TabStripPlacement="Left" SelectionChanged="TabControl_SelectionChanged" Margin="0,0,0,61">
+            <TabItem Header="Player">
+                <Grid>
+                    <CheckBox x:Name="chkNoDeath_Player" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="200" Checked="player_NoDeath_On" Unchecked="player_NoDeath_Off" ToolTip="Prevents the player from dying">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="No death (player)"/>
+                            <TextBlock x:Name="textNoDeath_Player_Hotkey" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+                    <CheckBox HorizontalAlignment="Left" Margin="9,10,0,0" VerticalAlignment="Top" Checked="noDeathAll_On" Unchecked="noDeathAll_Off">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="No death (all)"/>
+                            <TextBlock x:Name="textNoDeath_All_Hotkey" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+                    <CheckBox x:Name="chkPlayer_LockHP" Content="Lock HP" HorizontalAlignment="Left" Margin="9,72,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="txtLockHP" HorizontalAlignment="Left" Margin="110,72,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="34" Height="15" FontSize="9" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric"/>
+                    <CheckBox x:Name="chkInfiniteStamina" Content="Stamina" HorizontalAlignment="Left" Margin="11,139,0,0" VerticalAlignment="Top" Checked="InfiniteStamina_On" Unchecked="InfiniteStamina_Off" ToolTip="Actions do not deplete stamina"/>
+                    <CheckBox x:Name="chkInfiniteFocus" Content="Focus" HorizontalAlignment="Left" Margin="85,139,0,0" VerticalAlignment="Top" Checked="InfiniteFocus_On" Unchecked="InfiniteFocus_Off" ToolTip="Actions do not deplete focus"/>
+                    <CheckBox x:Name="chkInfiniteConsumables" Content="Consumables" HorizontalAlignment="Left" Margin="152,139,0,0" VerticalAlignment="Top" Checked="InfiniteConsumables_On" Unchecked="InfiniteConsumables_Off"/>
+                    <CheckBox x:Name="chkOneShot" HorizontalAlignment="Left" Margin="9,112,0,0" VerticalAlignment="Top" Checked="oneShot_on" Unchecked="oneShot_off" ToolTip="All enemies are one shot kills">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="One shot"/>
+                            <TextBlock x:Name="textOneShot" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+                    <CheckBox x:Name="chkRuneArc" HorizontalAlignment="Left" Margin="7,92,0,0" VerticalAlignment="Top" Checked="runeArc_On" Unchecked="runeArc_Off" ToolTip="Enables rune arc">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Rune Arc"/>
+                            <TextBlock x:Name="textRuneArc_Hotkey" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+
+                    <CheckBox HorizontalAlignment="Left" Margin="11,52,0,0" VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="No death (enemies)"/>
+                            <TextBlock x:Name="textNoDeath_Enemies" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+
+                    <CheckBox x:Name="chkDisableAI" HorizontalAlignment="Left" Margin="18,238,0,0" VerticalAlignment="Top" Checked="disableAIUpdates_On" Unchecked="disableAIUpdates_Off" ToolTip="All enemies will have their AI frozen">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Disable AI updates"/>
+                            <TextBlock x:Name="textDisableAI" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+                    <CheckBox HorizontalAlignment="Left" Margin="17,218,0,0" VerticalAlignment="Top" Checked="repeatLastAction_On" Unchecked="repeatLastAction_Off" ToolTip="Enemies will repeat the same action">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="chkRepeatLastAction" Text="Repeat last action"/>
+                            <TextBlock x:Name="textRepeatLastAction" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+                    <Label Content="Target Display" HorizontalAlignment="Left" Margin="9,250,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <CheckBox Content="Show target display" HorizontalAlignment="Left" Margin="28,276,0,0" VerticalAlignment="Top" Checked="showTargetDisplay" Unchecked="hideTargetDisplay"/>
+                    <CheckBox x:Name="chkTargetDisplayOnTop" Content="Always on top" HorizontalAlignment="Left" Margin="18,296,0,0" VerticalAlignment="Top" Checked="TargetDisplay_TopOn" Unchecked="TargetDisplay_TopOff" IsChecked="True"/>
+                    <CheckBox Content="Lock enemy poise" HorizontalAlignment="Left" Margin="10,322,0,0" VerticalAlignment="Top" Checked="LockPoise_On" Unchecked="LockPoise_Off"/>
+                    <TextBox x:Name="textLockPoise" HorizontalAlignment="Left" Margin="146,321,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="35" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric"/>
+                    <CheckBox Content="Disable poise reset timer" HorizontalAlignment="Left" Margin="10,342,0,0" VerticalAlignment="Top" Checked="DisablePoiseResetTimer_On" Unchecked="DisablePoiseResetTimer_Off"/>
+                    <CheckBox Content="No gravity" HorizontalAlignment="Left" Margin="11,159,0,0" VerticalAlignment="Top" Checked="NoGravity_On" Unchecked="NoGravity_Off"/>
+                    <CheckBox x:Name="chkShowAllGraces" Content="Show all graces" HorizontalAlignment="Left" Margin="11,179,0,0" VerticalAlignment="Top" Checked="ShowAllGraces_On" Unchecked="ShowAllGraces_Off"/>
+                    <CheckBox HorizontalAlignment="Left" Margin="14,198,0,0" VerticalAlignment="Top" Checked="ShowStableGround_On" Unchecked="ShowStableGround_Off">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Show stable ground"/>
+                            <TextBlock x:Name="textStableGround" Text="" Foreground="Gray"/>
+                        </StackPanel>
+                    </CheckBox>
+                    <Button x:Name="buttonPlusY" Content="+Y" HorizontalAlignment="Left" Margin="14,375,0,0" VerticalAlignment="Top" Click="NudgePlayer"/>
+                    <Button x:Name="buttonMinusY" Content="-Y" HorizontalAlignment="Left" Margin="46,375,0,0" VerticalAlignment="Top" Click="NudgePlayer"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Stats">
+                <Grid Background="#FFFFFFFF">
+                    <TextBlock HorizontalAlignment="Left" Margin="10,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Vigor"/></TextBlock>
+                    <TextBox x:Name="textVigor" HorizontalAlignment="Left" Margin="90,50,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Endurance"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Mind"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,113,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Strength"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Level"/></TextBlock>
+                    <TextBox x:Name="textPlayerLevel" HorizontalAlignment="Left" Margin="91,12,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Dexterity"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,155,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Intelligence"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,176,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Faith"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,197,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Arcane"/></TextBlock>
+                    <TextBox x:Name="textEndurance" HorizontalAlignment="Left" Margin="90,91,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBox x:Name="textMind" HorizontalAlignment="Left" Margin="90,71,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBox x:Name="textStrength" HorizontalAlignment="Left" Margin="90,113,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,218,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Scadu"/></TextBlock>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,239,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Ash"/></TextBlock>
+                    <TextBox x:Name="textDexterity" HorizontalAlignment="Left" Margin="90,134,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBox x:Name="textIntelligence" HorizontalAlignment="Left" Margin="90,155,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBox x:Name="textFaith" HorizontalAlignment="Left" Margin="90,176,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBox x:Name="textArcane" HorizontalAlignment="Left" Margin="90,197,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyStatRange"/>
+                    <TextBox x:Name="textScadu" HorizontalAlignment="Left" Margin="90,218,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyDLCStatRange"/>
+                    <TextBox x:Name="textAsh" HorizontalAlignment="Left" Margin="90,239,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="40" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyDLCStatRange"/>
+                    <Button x:Name="buttonSetStats" Content="Set Stats" HorizontalAlignment="Left" Margin="165,11,0,0" VerticalAlignment="Top" Width="120" Click="buttonSetStats_Click"/>
+                    <CheckBox Content="Calculate correct level" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textRunes" HorizontalAlignment="Left" Margin="10,292,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric" LostFocus="TextBox_VerifyDLCStatRange"/>
+                    <Button Content="Set Runes" HorizontalAlignment="Left" Margin="165,291,0,0" VerticalAlignment="Top" Width="120" Click="buttonSetStats_Click"/>
+                    <TextBox x:Name="textIGTSeconds" HorizontalAlignment="Left" Margin="10,315,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" TextAlignment="Right"/>
+                    <Button Content="Set Gametime" HorizontalAlignment="Left" Margin="185,315,0,0" VerticalAlignment="Top" Width="100" Click="buttonSetStats_Click"/>
+                    <TextBox x:Name="textNewGamePlus" HorizontalAlignment="Left" Margin="10,338,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="120" TextAlignment="Right"/>
+                    <Button Content="Set NG+ level" HorizontalAlignment="Left" Margin="165,340,0,0" VerticalAlignment="Top" Width="120"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Enemy">
+                <Grid Background="#FFFFFFFF">
+                    <Button Content="New Target Window" HorizontalAlignment="Left" Margin="39,199,0,0" VerticalAlignment="Top" Width="194" Click="openNewTargetWindow"/>
+                    <ListBox x:Name="listboxEntityList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="43,10,187,242">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding StringFormat={}{0:x}}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Items">
+                <Grid Background="#FFFFFFFF">
+                    <TextBox x:Name="textItemSearch" HorizontalAlignment="Left" Margin="10,25,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="240" TextChanged="itemSearchTextChanged"/>
+                    <ListBox x:Name="listboxItems" d:ItemsSource="{d:SampleData ItemCount=1}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,48,0,0" Height="165" Width="240" SelectionChanged="listboxItems_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Label Content="Affinity" HorizontalAlignment="Left" Margin="10,213,0,0" VerticalAlignment="Top"/>
+                    <Label Content="Ash of War" HorizontalAlignment="Left" Margin="10,261,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="comboAffinities" HorizontalAlignment="Left" Margin="10,239,0,0" VerticalAlignment="Top" Width="240"/>
+                    <ComboBox x:Name="comboAshes" HorizontalAlignment="Left" Margin="10,287,0,0" VerticalAlignment="Top" Width="240">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,322,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Level"/></TextBlock>
+                    <TextBox x:Name="textSpawnQuantity" HorizontalAlignment="Left" Margin="199,322,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="51" TextAlignment="Right" PreviewTextInput="TextBox_VerifyNumeric"/>
+                    <ComboBox x:Name="comboWeaponLevel" HorizontalAlignment="Left" Margin="45,320,0,0" VerticalAlignment="Top" Width="60"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="130,323,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="en-au" Text="Quantity"/></TextBlock>
+                    <Button Content="Spawn Item" HorizontalAlignment="Left" Margin="10,356,0,0" VerticalAlignment="Top" Width="240" Click="spawnItem"/>
+                    <TextBlock x:Name="textTemp" HorizontalAlignment="Left" Margin="76,388,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Warp">
+                <Grid Background="#FFE5E5E5">
+                    <ComboBox HorizontalAlignment="Left" Margin="39,110,0,0" VerticalAlignment="Top" Width="205" IsEditable="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Menus">
+                <Grid Background="#FFE5E5E5">
+                    <Button x:Name="buttonMenu_Grace" Content="Grace / Level up" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                    <Button x:Name="buttonMenu_Ash" Content="Ash of War" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                    <Button x:Name="buttonMenu_Physick" Content="Physick" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                    <Button x:Name="buttonMenu_Spells" Content="Memorize Spells" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                    <Button x:Name="buttonMenu_Rune" Content="Great Rune" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                    <Button x:Name="buttonMenu_Chest" Content="Sort Chest" HorizontalAlignment="Left" Margin="10,135,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                    <Button x:Name="buttonMenu_Rebirth" Content="Rebirth" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" Width="153" Click="OpenMenu"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Render">
+                <Grid Background="#FFE5E5E5">
+                    <CheckBox Content="Weapon hitboxes" HorizontalAlignment="Left" Margin="10,18,0,0" VerticalAlignment="Top" Checked="WeaponHitboxes_On" Unchecked="WeaponHitboxes_Off"/>
+                    <CheckBox Content="Character meshes" HorizontalAlignment="Left" Margin="23,52,0,0" VerticalAlignment="Top" Checked="ModelHitboxes_On" Unchecked="ModelHitboxes_Off"/>
+                    <CheckBox Content="Collision mesh A" HorizontalAlignment="Left" Margin="32,83,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Collision mesh B" HorizontalAlignment="Left" Margin="32,103,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Walls" HorizontalAlignment="Left" Margin="40,123,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Event hitboxes" HorizontalAlignment="Left" Margin="44,157,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Enemy target view" HorizontalAlignment="Left" Margin="34,196,0,0" VerticalAlignment="Top" Checked="TargetView_On" Unchecked="TargetView_Off"/>
+                    <CheckBox Content="Sound view" HorizontalAlignment="Left" Margin="34,216,0,0" VerticalAlignment="Top" Checked="SoundView_On" Unchecked="SoundView_Off"/>
+                    <CheckBox Content="Hide models" HorizontalAlignment="Left" Margin="34,263,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Hide terrain" HorizontalAlignment="Left" Margin="44,293,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Flags">
+                <Grid Background="#FFFFFFFF">
+                    <ComboBox x:Name="comboFlagCategories" HorizontalAlignment="Left" Margin="23,14,0,0" VerticalAlignment="Top" Width="247" SelectedIndex="0">
+                        <ComboBoxItem Content="Graces/Maps (Basegame)"/>
+                        <ComboBoxItem Content="Graces/Maps (DLC)"/>
+                        <ComboBoxItem Content="Bosses (Basegame)"/>
+                        <ComboBoxItem Content="Bosses (DLC)"/>
+                    </ComboBox>
+                    <ListBox x:Name="listboxFlags" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="23,41,25,140">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280" />
+                                        <ColumnDefinition Width="20" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Key}" />
+                                    <CheckBox Grid.Column="1" Content="" HorizontalAlignment="Right" VerticalAlignment="Top" Checked="flagCheckToggle" Unchecked="flagCheckToggle"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Button Content="All flags on" HorizontalAlignment="Left" Margin="23,290,0,0" VerticalAlignment="Top" Width="247"/>
+                    <Button Content="All flags off" HorizontalAlignment="Left" Margin="23,315,0,0" VerticalAlignment="Top" Width="247"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Saves">
+                <Grid Background="#FFE5E5E5">
+                    <TextBox x:Name="textERSaveFile" HorizontalAlignment="Left" Margin="10,16,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="169" IsReadOnly="True" MaxHeight="18"/>
+                    <Button x:Name="buttonSetERSave" Content="Set main save" HorizontalAlignment="Left" Margin="188,15,0,0" VerticalAlignment="Top" Width="97" Click="SetERSaveFile"/>
+                    <Button x:Name="buttonSetSaveFolder" Content="Set save folder" HorizontalAlignment="Left" Margin="188,40,0,0" VerticalAlignment="Top" Width="97"  Click="SetBackupSaveDirectory"/>
+                    <TextBox x:Name="textSaveFolder" HorizontalAlignment="Left" Margin="10,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="169" IsReadOnly="True" MaxHeight="18"/>
+                    <TreeView x:Name="treeSaveFolders" Margin="10,348,10,28"/>
+                    <TextBox x:Name="textSaveFile" HorizontalAlignment="Left" Margin="10,68,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="169" IsReadOnly="True" MaxHeight="18"/>
+                    <Button x:Name="buttonSelectSaveFile" Content="Select save" HorizontalAlignment="Left" Margin="188,67,0,0" VerticalAlignment="Top" Width="97"  Click="SelectSaveFile"/>
+                    <Button x:Name="buttonLoadSave" Content="Load save" HorizontalAlignment="Center" Margin="0,95,0,0" VerticalAlignment="Top" Width="275"  Click="LoadSaveFile"/>
+                    <Button x:Name="buttonCreateSave" Content="Create new save" HorizontalAlignment="Center" Margin="0,124,0,0" VerticalAlignment="Top" Width="275"  Click="CreateNewSave"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Misc">
+                <Grid Background="#FFFFFFFF">
+                    <CheckBox Content="Lock FPS" HorizontalAlignment="Left" Margin="10,23,0,0" VerticalAlignment="Top" Checked="LockFPS_On" Unchecked="LockFPS_Off"/>
+                    <CheckBox Content="Game speed" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top" Checked="GameSpeed_On" Unchecked="GameSpeed_Off"/>
+                    <TextBox x:Name="textFPS" HorizontalAlignment="Center" Margin="0,22,0,0" TextWrapping="Wrap" Text="60" VerticalAlignment="Top" Width="51" TextAlignment="Right" PreviewTextInput="TextBox_VerifyFloat"/>
+                    <TextBox x:Name="textGameSpeed" HorizontalAlignment="Center" Margin="0,43,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="51" TextAlignment="Right" PreviewTextInput="TextBox_VerifyFloat"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Info">
+                <Grid Background="#FFE5E5E5">
+                    <CheckBox Content="Show info panel" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="showInfoPanel" Unchecked="hideInfoPanel"/>
+                    <CheckBox x:Name="chkInfo_IGT" Content="In Game Time" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Player position" HorizontalAlignment="Left" Margin="10,62,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="Map region" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top"/>
+                    <CheckBox Content="FPS" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top"/>
+                    <Separator HorizontalAlignment="Left" Margin="10,51,0,0" VerticalAlignment="Top" Height="6" Width="267"/>
+                    <CheckBox x:Name="chkInfoPanelOnTop" Content="Always on top" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Settings">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem x:Name="tabError" Header="Error">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="51*"/>
+                        <ColumnDefinition Width="11*"/>
+                        <ColumnDefinition Width="25*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Failed to connect to Elden Ring" HorizontalAlignment="Left" Margin="43,22,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+                    <Button x:Name="buttonRetryLink" Content="Retry" HorizontalAlignment="Left" Margin="97,53,0,0" VerticalAlignment="Top" Click="RetryLink" Width="67" Grid.ColumnSpan="2"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StatusBar Margin="0,473,0,0"/>
+        <Button Content="Fast Quitout" HorizontalAlignment="Left" Margin="163,436,0,0" VerticalAlignment="Top" Click="FastQuitout"/>
+    </Grid>
+</Window>
