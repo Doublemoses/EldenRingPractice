@@ -20,10 +20,15 @@ namespace EldenRingPractice
     public partial class TargetDisplay : Window
     {
         IntPtr pointer;
-        public TargetDisplay(IntPtr entityPointer)
+        public TargetDisplay(IntPtr entityPointer = 0, bool show = false)
         {
             InitializeComponent();
             pointer = entityPointer;
+            if (show) { this.Show(); }
+            if (entityPointer != 0)
+            {
+                this.Title = "Entity " + pointer.ToString("X16");
+            }
         }
 
         public IntPtr getPointer()

@@ -11,10 +11,31 @@ using static EldenRingPractice.ItemSpawner;
 
 namespace EldenRingPractice
 {
-    class FlagManager
+    class FlagManager : IDisposable
     {
         private Dictionary<string, uint> graceBasegameFlags = new Dictionary<string, uint>();
         private Dictionary<string, uint> graceDLCFlags = new Dictionary<string, uint>();
+
+        private bool disposed = false;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            { return; }
+
+            if (disposing)
+            {
+
+            }
+
+            disposed = true;
+        }
 
         public enum FlagCategory
         {

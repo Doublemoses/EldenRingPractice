@@ -20,13 +20,10 @@ C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\ref\EldenRingPractice.dll
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\TargetDisplay.g.cs
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\TargetDisplay.baml
-C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\EventLog.g.cs
-C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\EventLog.baml
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\InfoPanel.g.cs
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\InfoPanel.baml
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\App.baml
-C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\HotkeySettings.g.cs
-C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\HotkeySettings.baml
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\bin\Debug\net8.0-windows\Tomlyn.dll
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\EldenRingPractice.csproj.AssemblyReference.cache
 C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\EldenRin.716161B4.Up2Date
+C:\Users\mjaco\source\repos\EldenRingPractice\EldenRingPractice\obj\Debug\net8.0-windows\EldenRingPractice.sourcelink.json

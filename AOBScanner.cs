@@ -1,172 +1,153 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.Reflection.PortableExecutable;
 using System.Windows;
 
 namespace EldenRingPractice
 {
-    public class AOBScanner : IDisposable
+    class AOBScanner : IDisposable
     {
         [DllImport("ntdll.dll")]
         static extern int NtReadVirtualMemory(IntPtr ProcessHandle, IntPtr BaseAddress, byte[] Buffer, UInt32 NumberOfBytesToRead, ref UInt32 NumberOfBytesRead);
 
-        public uint textOneSize = 0;
-        public int textOneAddr = 0;
-        public uint textTwoSize = 0;
-        public int textTwoAddr = 0;
-        public byte[] sectionOne = new byte[0];
-        public byte[] sectionTwo = new byte[0];
+        public List<int> sectionAddress = new List<int>();
+        public List<int> sectionSize = new List<int>();
+        public List<byte[]> sectionData = new List<byte[]>();
 
-        public AOBScanner(IntPtr handle, IntPtr baseAddr, int size)
+        bool disposed = false;
+
+        public AOBScanner(IntPtr processHandle, IntPtr baseAddress, int size)
         {
-#if !DEBUG
-            outputConsole = false;
-#endif
-
-            //TODO: switch to .NET 5+ and use PEHeaders?
-            //for now: assume two text sections, and aob scan for them, of course.
-
-            var buf = new byte[0x600];
+            byte[] buffer = new byte[0x600];
             uint bytesRead = 0;
-            NtReadVirtualMemory(handle, baseAddr, buf, (uint)buf.Length, ref bytesRead);
-            var dotText = Encoding.ASCII.GetBytes(".text");
-            var dummy = new byte[5];
-            int textOne = FindBytes(buf, dotText, dummy);
-            if (textOne < 0)
+
+            NtReadVirtualMemory(processHandle, baseAddress, buffer, 0x600, ref bytesRead);
+
+            using (MemoryStream stream = new MemoryStream(buffer))
+            using (PEReader reader = new PEReader(stream))
             {
-                Console.WriteLine("Cannot find text section");
-                return;
-            }
-            textOneSize = BitConverter.ToUInt32(buf, textOne + 8);
-            textOneAddr = BitConverter.ToInt32(buf, textOne + 12);
-            sectionOne = new byte[textOneSize];
-            NtReadVirtualMemory(handle, baseAddr + textOneAddr, sectionOne, textOneSize, ref bytesRead);
+                var headers = reader.PEHeaders;
 
-            int textTwo = FindBytes(buf, dotText, dummy, textOne + 0x28);
-            if (textTwo > 0)
-            {
-                textTwoSize = BitConverter.ToUInt32(buf, textTwo + 8);
-                textTwoAddr = BitConverter.ToInt32(buf, textTwo + 12);
-                sectionTwo = new byte[textTwoSize];
-                NtReadVirtualMemory(handle, baseAddr + textTwoAddr, sectionTwo, textTwoSize, ref bytesRead);
-            }
-
-            Console.ReadLine();
-        }
-
-        //originally from https://github.com/Wulf2k/ER-Patcher.git
-        //try and keep in sync with https://github.com/kh0nsu/FromAobScan
-        public byte[] hs2b(string hex)
-        {
-            hex = hex.Replace(" ", "");
-            hex = hex.Replace("-", "");
-            hex = hex.Replace(":", "");
-
-            byte[] b = new byte[hex.Length >> 1];
-            for (int i = 0; i <= b.Length - 1; ++i)
-            {
-                b[i] = (byte)((hex[i * 2] - (hex[i * 2] < 58 ? 48 : (hex[i * 2] < 97 ? 55 : 87))) * 16 + (hex[i * 2 + 1] - (hex[i * 2 + 1] < 58 ? 48 : (hex[i * 2 + 1] < 97 ? 55 : 87))));
-            }
-            return b;
-        }
-
-        public byte[] hs2w(string hex)
-        {
-            hex = hex.Replace(" ", "");
-            hex = hex.Replace("-", "");
-            hex = hex.Replace(":", "");
-
-            byte[] wild = new byte[hex.Length >> 1];
-            for (int i = 0; i <= wild.Length - 1; ++i)
-            {
-                if (hex[i * 2].Equals('?'))
+                foreach (var section in headers.SectionHeaders)
                 {
-                    wild[i] = 1;
-                }
-            }
-            return wild;
-        }
-
-        public int FindBytes(byte[] buf, byte[] find, byte[] wild, int startIndex = 0, int lastIndex = -1)
-        {
-            if (buf == null || find == null || buf.Length == 0 || find.Length == 0 || find.Length > buf.Length) return -1;
-            if (lastIndex < 1) { lastIndex = buf.Length - find.Length; }
-            for (int i = startIndex; i < lastIndex + 1; i++)
-            {
-                if (buf[i] == find[0])
-                {
-                    for (int m = 1; m < find.Length; m++)
+                    if (section.Name == ".text")
                     {
-                        if ((buf[i + m] != find[m]) && (wild[m] != 1)) break;
-                        if (m == find.Length - 1) return i;
+                        sectionAddress.Add(section.VirtualAddress);
+                        sectionSize.Add(section.SizeOfRawData);
+                        sectionData.Add(new byte[section.SizeOfRawData]);
+                        NtReadVirtualMemory(processHandle, baseAddress + section.VirtualAddress, sectionData[sectionData.Count - 1], (uint)section.SizeOfRawData, ref bytesRead);
                     }
                 }
             }
-            return -1;
-        }
-
-        public bool outputConsole = true;
-
-        public int findAddr(byte[] buf, int blockVirtualAddr, string find, string desc, int readoffset32 = -1000, int nextInstOffset = -1000, int justOffset = -1000, int startIndex = 0, bool singleMatch = true, Action<int> callback = null)
-        {//TODO: for single match and non-zero start index, try zero start index if no match is found?
-            int count = 0;
-
-            byte[] fb = hs2b(find);
-            byte[] fwb = hs2w(find);
-
-            int index = startIndex;
-
-            int result = -1;
-
-            do
-            {
-                index = FindBytes(buf, fb, fwb, index);
-                if (index != -1)
-                {
-                    count++;
-                    int rva = index + blockVirtualAddr;
-                    result = rva;
-                    string output = desc + " found at index " + index + " offset hex " + rva.ToString("X2");
-
-                    if (readoffset32 > -1000)
-                    {
-                        int index32 = index + readoffset32;
-                        var val = BitConverter.ToInt32(buf, index32);
-                        result = val;
-                        output += " raw val " + val.ToString("X2");
-                        if (nextInstOffset > -1000)
-                        {
-                            int next = blockVirtualAddr + index + nextInstOffset + val;
-                            result = next;
-                            output += " final offset " + next.ToString("X2");
-                        }
-                    }
-
-                    if (justOffset > -1000)
-                    {
-                        result = rva + justOffset;
-                        output += " with offset " + (rva + justOffset).ToString("X2");
-                    }
-
-                    if (outputConsole) { Console.WriteLine(output); }
-                    index += fb.Length; //keep searching in case there's multiple.
-                }
-                if (index != -1 && callback != null) { callback(result); }
-            }
-            while (index != -1 && !singleMatch);
-            if (0 == count) { Console.WriteLine("Nothing found for " + desc); }
-            return result;
         }
 
         public void Dispose()
         {
-            sectionOne = null;
-            sectionTwo = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            { return; }
+
+            if (disposing)
+            {
+                sectionAddress.Clear();
+                sectionAddress = null;
+                sectionSize.Clear();
+                sectionSize = null;
+                sectionData.Clear();
+                sectionData = null;
+            }
+            disposed = true;
+        }
+
+        public int findAddress(string patternSource, int section, int startOffset = 0, int offsetResult = 0, int chainOffset = 0)
+        {
+            if (section >= sectionAddress.Count)
+                { return -1; }
+
+            (byte, bool)[] searchPattern = convertSearchStringToBytes(patternSource);
+
+            IntPtr currentAddress = IntPtr.Zero;
+            int indexResult = -1;
+
+            indexResult = scanMemory(searchPattern, section, startOffset);
+                
+            if (indexResult != -1)
+            {
+                if (chainOffset != 0 && offsetResult == 0)
+                    { indexResult = BitConverter.ToInt32(sectionData[section], indexResult + chainOffset); }
+                else if (chainOffset != 0 && offsetResult != 0)
+                    { indexResult += BitConverter.ToInt32(sectionData[section], indexResult + chainOffset) + offsetResult + sectionAddress[section]; }
+                else
+                    { indexResult += sectionAddress[section] + offsetResult; }
+            }
+            return indexResult;
+        }
+
+        private (byte, bool)[] convertSearchStringToBytes(string patternSource)
+        {
+            string[] splitPattern = patternSource.Split(" ");
+            (byte, bool)[] searchPattern = new (byte, bool)[splitPattern.Length];
+
+            for (int i = 0; i < splitPattern.Length; i++)
+            {
+                if (splitPattern[i].Contains("?"))
+                { searchPattern[i] = (0x0, true); }
+                else
+                {
+                    try
+                    {
+                        searchPattern[i] = (Convert.ToByte(splitPattern[i], 16), false);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("you absolute dingus you typed the address in wrong");
+                    }
+                }
+            }
+
+            return searchPattern;
+        }
+
+        private int scanMemory((byte patternByte, bool isWildcard)[] searchPattern, int section, int startOffset)
+        {
+            
+            
+            for ( int i = startOffset;
+                  i <= ( sectionSize[section] - searchPattern.Length );
+                  i++ )
+            {
+                if (searchPattern[0].patternByte == sectionData[section][i] )
+                {
+                    bool matching = true;
+                    int j = 1;
+
+                    while (matching)
+                    {
+                        if (j >= searchPattern.Length)
+                        {
+                            return i;
+                        }
+                        if ( !searchPattern[j].isWildcard && searchPattern[j].patternByte != sectionData[section][i+j] )
+                        {
+                            matching = false;
+                        }
+                        j++;
+                    }
+                }
+            }
+            return -1;
         }
     }
 }

@@ -31,11 +31,11 @@ public partial class MainWindow : Window, IDisposable
     HotkeyManager hotkeyManager;
     ItemSpawner itemSpawner;
     FlagManager flagManager;
-    EventLog eventLog;
+    //EventLog eventLog;
     System.Windows.Threading.DispatcherTimer uiTimer = new System.Windows.Threading.DispatcherTimer();
 
     // popup windows
-    TargetDisplay targetDisplay = new TargetDisplay(0);
+    TargetDisplay targetDisplay = new TargetDisplay();
     InfoPanel infoPanel = new InfoPanel();
 
     //
@@ -47,9 +47,6 @@ public partial class MainWindow : Window, IDisposable
     //
 
     bool disposed = false;
-
-    [DllImport("user32.dll")]
-    static extern short GetAsyncKeyState([In] int vKey);
 
     public MainWindow()
     {
@@ -74,15 +71,15 @@ public partial class MainWindow : Window, IDisposable
         uiTimer.Interval = TimeSpan.FromSeconds(0.1);
         uiTimer.Start();
 
-        settingsManager = new SettingsManager();
+        //settingsManager = new SettingsManager();
         hotkeyManager = new HotkeyManager(this);
         itemSpawner = new ItemSpawner();
         flagManager = new FlagManager();
 
-        eventLog = new EventLog();
+        //eventLog = new EventLog();
         //eventLog.Show();
-        //Closing += MainWindow_Closing;
-        Closed += WindowClosed;
+        Closing += WindowClosed;
+        //Closed += WindowClosed;
         Loaded += MainWindow_Loaded;
 
         SetupItemsTab();
@@ -92,7 +89,6 @@ public partial class MainWindow : Window, IDisposable
 
     void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        //updateHotkeyLabels();
         updateHotkeyText();
     }
 
@@ -110,11 +106,14 @@ public partial class MainWindow : Window, IDisposable
         if (disposing)
         {
             _process.Dispose();
-            _process = null;
+            //_process = null;
+            hotkeyManager.Dispose();
+            itemSpawner.Dispose();
+            flagManager.Dispose();
+            //settingsManager.Dispose();
             uiTimer.Stop();
-            uiTimer = null;
+            //uiTimer = null;
         }
-
         disposed = true;
     }
 
@@ -123,18 +122,17 @@ public partial class MainWindow : Window, IDisposable
     {
         targetDisplay.Close();
         infoPanel.Close();
-        eventLog.Close();
+        //eventLog.Close();
+        Dispose();
     }
 
     public void AddLogEntry(string entry)
     {
-        eventLog.AddEntry(entry);
+        //eventLog.AddEntry(entry);
     }
 
     void updateHotkeyText()
     {
-        
-
         foreach (KeyValuePair<(int hotkey, ModifierKeys modifiers), ERLink.GameOptions> hotkeyEntry in hotkeyManager.hotkeyList)
         {
             string hotkeyText = "";
@@ -151,7 +149,6 @@ public partial class MainWindow : Window, IDisposable
             switch (hotkeyEntry.Value)
             {
                 case GameOptions.NO_DEATH_PLAYER:
-                    //MessageBox.Show(hotkeyText);
                     textNoDeath_Player_Hotkey.Text = $" ({hotkeyText})"; break;
             }
         }
@@ -556,6 +553,11 @@ public partial class MainWindow : Window, IDisposable
         {
             UpdateInfoPanel();
         }
+
+        if (targetDisplays.Count > 0)
+        {
+            updateEntityViews();
+        }
     }
 
     void UpdateTargetDisplay()
@@ -606,6 +608,9 @@ public partial class MainWindow : Window, IDisposable
             targetDisplay.textSleep.Text = $"{(int)statCurrent}/{(int)statMax}";
             targetDisplay.barSleep.Value = statCurrent;
             targetDisplay.barSleep.Maximum = statMax;
+
+            statCurrent = _process.getTargetStats(ERLink.TargetStats.ANIMATION);
+            targetDisplay.textCurrentAnimation.Text = statCurrent.ToString();
         }
         else
         {
@@ -647,51 +652,72 @@ public partial class MainWindow : Window, IDisposable
         foreach (TargetDisplay target in targetDisplays)
         {
             //if hp is not valid, then data is nonsense
-            double statCurrent = _process.getTargetStats(ERLink.TargetStats.HP);
+            IntPtr pointer = target.getPointer();
+            double statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.HP);
 
             if (statCurrent > -1)
             {
-                double statMax = _process.getTargetStats(ERLink.TargetStats.HP_MAX);
+                double statMax = _process.getEntityStats(pointer, ERLink.TargetStats.HP_MAX);
                 target.textHP.Text = $"{(int)statCurrent}/{(int)statMax}";
                 target.barHP.Value = statCurrent;
                 target.barHP.Maximum = statMax;
 
-                statCurrent = _process.getTargetStats(ERLink.TargetStats.POISE);
-                statMax = _process.getTargetStats(ERLink.TargetStats.POISE_MAX);
-                double poiseTimer = _process.getTargetStats(ERLink.TargetStats.POISE_TIMER);
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.POISE);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.POISE_MAX);
+                double poiseTimer = _process.getEntityStats(pointer, ERLink.TargetStats.POISE_TIMER);
                 target.textPoise.Text = $"({poiseTimer:F1})s {statCurrent:F1}/{(int)statMax}";
                 target.barPoise.Value = statCurrent; // 'NaN' is not a valid value for property 'Value'. | Figure out why this happened.
                 target.barPoise.Maximum = statMax;
 
-                statCurrent = _process.getTargetStats(ERLink.TargetStats.BLEED);
-                statMax = _process.getTargetStats(ERLink.TargetStats.BLEED_MAX);
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.BLEED);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.BLEED_MAX);
                 target.textBleed.Text = $"{(int)statCurrent}/{(int)statMax}";
                 target.barBleed.Value = statCurrent;
                 target.barBleed.Maximum = statMax;
 
-                statCurrent = _process.getTargetStats(ERLink.TargetStats.FROST);
-                statMax = _process.getTargetStats(ERLink.TargetStats.FROST_MAX);
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.FROST);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.FROST_MAX);
                 target.textFrost.Text = $"{(int)statCurrent}/{(int)statMax}";
                 target.barFrost.Value = statCurrent;
                 target.barFrost.Maximum = statMax;
 
-                statCurrent = _process.getTargetStats(ERLink.TargetStats.ROT);
-                statMax = _process.getTargetStats(ERLink.TargetStats.ROT_MAX);
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.ROT);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.ROT_MAX);
                 target.textRot.Text = $"{(int)statCurrent}/{(int)statMax}";
                 target.barRot.Value = statCurrent;
                 target.barRot.Maximum = statMax;
-
-                statCurrent = _process.getTargetStats(ERLink.TargetStats.POISON);
-                statMax = _process.getTargetStats(ERLink.TargetStats.POISON_MAX);
+                
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.POISON);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.POISON_MAX);
                 target.textPoison.Text = $"{(int)statCurrent}/{(int)statMax}";
                 target.barPoison.Value = statCurrent;
                 target.barPoison.Maximum = statMax;
 
-                statCurrent = _process.getTargetStats(ERLink.TargetStats.SLEEP);
-                statMax = _process.getTargetStats(ERLink.TargetStats.SLEEP_MAX);
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.SLEEP);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.SLEEP_MAX);
                 target.textSleep.Text = $"{(int)statCurrent}/{(int)statMax}";
                 target.barSleep.Value = statCurrent;
                 target.barSleep.Maximum = statMax;
+
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.BLIGHT);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.BLIGHT_MAX);
+                target.textBlight.Text = $"{(int)statCurrent}/{(int)statMax}";
+                target.barBlight.Value = statCurrent;
+                target.barBlight.Maximum = statMax;
+
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.MADNESS);
+                statMax = _process.getEntityStats(pointer, ERLink.TargetStats.MADNESS_MAX);
+                target.textMadness.Text = $"{(int)statCurrent}/{(int)statMax}";
+                target.barMadness.Value = statCurrent;
+                target.barMadness.Maximum = statMax;
+
+                statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.ANIMATION);
+                var angle = _process.getEntityStats(pointer, ERLink.TargetStats.ANGLE);
+                var x = _process.getEntityStats(pointer, ERLink.TargetStats.X_POS);
+                var y = _process.getEntityStats(pointer, ERLink.TargetStats.Y_POS);
+                var z = _process.getEntityStats(pointer, ERLink.TargetStats.Z_POS);
+                //targetDisplay.textCurrentAnimation.Text = statCurrent.ToString();
+                target.textCurrentAnimation.Text = $"{statCurrent}\nX: {x:F3} Y: {y:F3} Z: {z:F3} Angle: {angle:F3}";
             }
             else
             {
@@ -724,6 +750,14 @@ public partial class MainWindow : Window, IDisposable
                     target.textSleep.Text = "N/A";
                     target.barSleep.Value = 1;
                     target.barSleep.Maximum = 1;
+
+                    target.textBlight.Text = "N/A";
+                    target.barBlight.Value = 1;
+                    target.barBlight.Maximum = 1;
+
+                    target.textMadness.Text = "N/A";
+                    target.barMadness.Value = 1;
+                    target.barMadness.Maximum = 1;
                 }
             }
         }
@@ -1051,8 +1085,7 @@ public partial class MainWindow : Window, IDisposable
 
     private void openNewTargetWindow(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show(((IntPtr)listboxEntityList.SelectedItem).ToString("X16"));
-        targetDisplays.Add(new TargetDisplay((IntPtr)listboxEntityList.SelectedItem));
-        targetDisplays.Last<IntPtr>;
+        //MessageBox.Show(((IntPtr)listboxEntityList.SelectedItem).ToString("X16"));
+        targetDisplays.Add(new TargetDisplay((IntPtr)listboxEntityList.SelectedItem, true));
     }
 }

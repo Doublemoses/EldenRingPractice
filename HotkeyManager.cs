@@ -16,7 +16,7 @@ using static EldenRingPractice.MainWindow;
 
 namespace EldenRingPractice
 {
-    class HotkeyManager
+    class HotkeyManager : IDisposable
     {
         static MainWindow? mainWindow;
 
@@ -25,6 +25,7 @@ namespace EldenRingPractice
         private const int WM_KEYDOWN = 0x0100;
         private static LowLevelKeyboardProc _proc = HookCallback;
         private static IntPtr _hookID = IntPtr.Zero;
+        private bool disposed = false;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -59,6 +60,25 @@ namespace EldenRingPractice
             mainWindow = mainoptions;
             loadHotkeys();
             _hookID = SetHook(_proc);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            { return; }
+
+            if (disposing)
+            {
+
+            }
+
+            disposed = true;
         }
 
         //test stuff

@@ -13,10 +13,11 @@ using System.Xml.Linq;
 
 namespace EldenRingPractice
 {
-    class ItemSpawner
+    class ItemSpawner : IDisposable
     {
         static Dictionary<string,uint> ashOfWarDB = new Dictionary<string, uint>();
         private SortedDictionary<string, (uint, ItemCategory)> itemIDs = new SortedDictionary<string, (uint, ItemCategory)>();
+        private bool disposed;
 
         public readonly string[] affinities =
         {
@@ -38,6 +39,26 @@ namespace EldenRingPractice
         public ItemSpawner()
         {
             
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            { return; }
+
+            if (disposing)
+            {
+                ashOfWarDB = null;
+                itemIDs = null;
+            }
+
+            disposed = true;
         }
 
         public enum ItemCategory

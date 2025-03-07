@@ -12,6 +12,7 @@ using System.Runtime.Intrinsics.Arm;
 using System.Net.Http.Headers;
 using Microsoft.VisualBasic.FileIO;
 using System.Windows.Controls;
+using System.Reflection;
 
 namespace EldenRingPractice
 {
@@ -28,9 +29,6 @@ namespace EldenRingPractice
         public bool linkActive = false;
 
         bool disposed = false;
-
-        //bool targetDisplayHooked = false;
-
         Thread erMonitorThread = null;
 
         [DllImport("kernel32.dll")]
@@ -64,8 +62,10 @@ namespace EldenRingPractice
 
             if (disposing)
             {
-                erMonitorThread = null;
+                //erMonitorThread = null;
             }
+
+            
 
             linkActive = false;
 
@@ -75,9 +75,6 @@ namespace EldenRingPractice
         public ERLink()
         {
             InitGameLink();
-
-            // TEST
-            //getEntityCount();
         }
 
         public void InitGameLink()
@@ -93,8 +90,6 @@ namespace EldenRingPractice
 
                 erMonitorThread = new Thread(() => { ERMonitor(); });
                 erMonitorThread.Start();
-
-                
             }
             else
             {
@@ -223,7 +218,7 @@ namespace EldenRingPractice
         {
             //var scanner = new AOBScanner(_erProcessHandle, erBaseAddress, erSize);
 
-            using (var scanner2 = new AOBMemoryScanner(_erProcessHandle, erBaseAddress, erSize))
+            using (var scanner2 = new AOBScanner(_erProcessHandle, erBaseAddress, erSize))
             {
 
                 logoOffset = scanner2.findAddress("74 53 48 8B 05 ?? ?? ?? ?? 48 85 C0 75 ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 4C 8B C8 4C 8D 05 ?? ?? ?? ?? BA ?? ?? 00 00 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ??", 0, 10900000);
@@ -299,7 +294,7 @@ namespace EldenRingPractice
 
         }
 
-        List<int> getMenuOffsets(AOBMemoryScanner scanner)
+        List<int> getMenuOffsets(AOBScanner scanner)
         {
             var results = new List<int>();
             
@@ -516,7 +511,7 @@ namespace EldenRingPractice
             TARGET_POISE_TIMER,
         }
 
-        public enum TargetStats
+        /*public enum TargetStats
         {
             HP, HP_MAX,
             POISE, POISE_MAX, POISE_TIMER,
@@ -527,6 +522,17 @@ namespace EldenRingPractice
             FROST, FROST_MAX,
             SLEEP, SLEEP_MAX,
             MADNESS, MADNESS_MAX,
+            ANIMATION,
+        }*/
+
+        public enum TargetStats
+        {
+            POISON,     ROT,     BLEED,     BLIGHT,     FROST,     SLEEP,     MADNESS,          // These two rows are in a set order, do not change.
+            POISON_MAX, ROT_MAX, BLEED_MAX, BLIGHT_MAX, FROST_MAX, SLEEP_MAX, MADNESS_MAX,      // All other rows have arbitrary values, and can be moved around freely.
+            HP, HP_MAX,
+            POISE, POISE_MAX, POISE_TIMER,
+            ANIMATION,
+            X_POS, Y_POS, Z_POS, ANGLE,
         }
 
         HashSet<GameOptions> ActiveOptions = new HashSet<GameOptions>();
@@ -841,7 +847,7 @@ namespace EldenRingPractice
 
             var code = ReadMemory(erBaseAddress + targetHookLocation, targetHookOrigCode.Length).Take(7); //compare first 7 bytes only; ignores target offset
 
-            //MessageBox.Show(targetHookReplacementCode);
+            //MessageBox.Show(code.ToString() + " | " + targetHookReplacementCode.Take(7).ToString());
 
             if (code.SequenceEqual(targetHookReplacementCode.Take(7)))
             {
@@ -1092,8 +1098,13 @@ namespace EldenRingPractice
 
         public double getTargetStats(TargetStats stat, double? setStat = null)
         {
+            //
+            //7FF45C903600 TARGET POINTER
+            //7ff45C999690 CE POINTER
             var targetPtr = ReadUInt64(erBaseAddress + codeCavePtrLoc);
             targetPtr = ReadUInt64((IntPtr)(targetPtr + 0x190));
+
+            //MessageBox.Show(targetPtr.ToString("X16"));
 
             if (targetPtr < ADDRESS_MINIMUM || targetPtr > ADDRESS_MAXIMUM) { return double.NaN; }
 
@@ -1111,6 +1122,8 @@ namespace EldenRingPractice
                     returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x40)) + 0x14); break;
                 case TargetStats.POISE_TIMER:
                     returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x40)) + 0x1c); break;
+                case TargetStats.ANIMATION:
+                    returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x18)) + 0x40); break;
                 default:
                     int poisonOff = stat - TargetStats.POISON;
                     int statIndex = poisonOff / 2;
@@ -1148,37 +1161,47 @@ namespace EldenRingPractice
 
         public double getEntityStats(IntPtr pointer, TargetStats stat, double? setStat = null)
         {
-            var targetPtr = ReadUInt64(erBaseAddress + codeCavePtrLoc);
-            if (pointer == 0)
-            {
-                targetPtr = ReadUInt64((IntPtr)(targetPtr + 0x190));
-            } else
-            {
-                targetPtr = (ulong)pointer;
-            }
-
-            if (targetPtr < ADDRESS_MINIMUM || targetPtr > ADDRESS_MAXIMUM) { return double.NaN; }
-
+            var targetPtr = (ulong)pointer + 0x190;
             IntPtr returnVal = 0;
+            bool returnFloat = false;
 
             switch (stat)
             {
                 case TargetStats.HP:
-                    returnVal = (IntPtr)(ReadUInt64((IntPtr)targetPtr) + 0x138); break;
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0) + 0x138; break;
                 case TargetStats.HP_MAX:
-                    returnVal = (IntPtr)(ReadUInt64((IntPtr)targetPtr) + 0x13c); break;
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0) + 0x13C; break;
                 case TargetStats.POISE:
-                    returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x40)) + 0x10); break;
-                case TargetStats.POISE_MAX:
-                    returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x40)) + 0x14); break;
-                case TargetStats.POISE_TIMER:
-                    returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x40)) + 0x1c); break;
-                default:
-                    int poisonOff = stat - TargetStats.POISON;
-                    int statIndex = poisonOff / 2;
-                    bool isMax = (poisonOff % 2) == 1;
-                    returnVal = (IntPtr)(ReadUInt64((IntPtr)(targetPtr + 0x20)) + (uint)((isMax ? 0x2c : 0x10) + 4 * statIndex));
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x40) + 0x10;
+                    returnFloat = true;
                     break;
+                case TargetStats.POISE_MAX:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x40) + 0x14;
+                    returnFloat = true;
+                    break;
+                case TargetStats.POISE_TIMER:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x40) + 0x1C;
+                    returnFloat = true;
+                    break;
+                case TargetStats.ANIMATION:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x18) + 0x40; break;
+                case TargetStats.ANGLE:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x68) + 0x54;
+                    break;
+                case TargetStats.X_POS:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x68) + 0x70;
+                    returnFloat = true;
+                    break;
+                case TargetStats.Y_POS:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x68) + 0x74;
+                    returnFloat = true;
+                    break;
+                case TargetStats.Z_POS:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x68) + 0x78;
+                    returnFloat = true;
+                    break;
+                default:
+                    returnVal = (IntPtr)resolvePointerChain((IntPtr)targetPtr, 0x20) + 0x10 + ((int)stat * 4); break;
             }
 
             var targetStat = ReadMemory(returnVal, 4);
@@ -1186,24 +1209,14 @@ namespace EldenRingPractice
             // insert setvalues handling
             if (setStat.HasValue)
             {
-                if (stat == TargetStats.POISE || stat == TargetStats.POISE_MAX || stat == TargetStats.POISE_TIMER)
-                {
-                    //double hi = (double)BitConverter.ToSingle(targetStat, 0);
-                    //MessageBox.Show("I'm trying plz " + hi.ToString());
-                    //WriteUInt8(returnVal, 15);
-                    WriteFloat(returnVal, (float)setStat.Value);
-                }
+                if (returnFloat)
+                    { WriteFloat(returnVal, (float)setStat.Value); }
                 else
-                {
-                    WriteInt32(returnVal, (int)setStat.Value);
-                }
-
+                    { WriteInt32(returnVal, (int)setStat.Value); }
             }
 
-            if (stat == TargetStats.POISE || stat == TargetStats.POISE_MAX || stat == TargetStats.POISE_TIMER)
-            {
-                return (double)BitConverter.ToSingle(targetStat, 0);
-            }
+            if (returnFloat)
+                { return (double)BitConverter.ToSingle(targetStat, 0); }
 
             return (double)BitConverter.ToInt32(targetStat, 0);
         }

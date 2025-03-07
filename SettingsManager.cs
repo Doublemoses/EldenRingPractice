@@ -14,11 +14,12 @@ using Tomlyn.Model;
 
 namespace EldenRingPractice
 {
-    class SettingsManager
+    class SettingsManager : IDisposable
     {
         XmlDocument settingsXML = null;
         const string settingsFileName = "settings.xml";
         string settingsFullPath = "";
+        bool disposed = false;
 
         public SettingsManager()
         {
@@ -35,6 +36,25 @@ namespace EldenRingPractice
             {
                 createNewSettingsFile();
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            { return; }
+
+            if (disposing)
+            {
+
+            }
+
+            disposed = true;
         }
 
         void createNewSettingsFile()
