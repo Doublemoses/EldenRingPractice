@@ -1161,7 +1161,19 @@ namespace EldenRingPractice
 
         public double getEntityStats(IntPtr pointer, TargetStats stat, double? setStat = null)
         {
-            var targetPtr = (ulong)pointer + 0x190;
+            ulong targetPtr = 0;
+
+            if (pointer == 0)
+            {
+                targetPtr = ReadUInt64(erBaseAddress + codeCavePtrLoc);
+                targetPtr += 0x190;
+                //MessageBox.Show(targetPtr.ToString("X16"));
+            }
+            else
+            {
+                targetPtr = (ulong)pointer + 0x190;
+                Console.WriteLine(targetPtr.ToString("X16"));
+            }
             IntPtr returnVal = 0;
             bool returnFloat = false;
 

@@ -35,7 +35,7 @@ public partial class MainWindow : Window, IDisposable
     System.Windows.Threading.DispatcherTimer uiTimer = new System.Windows.Threading.DispatcherTimer();
 
     // popup windows
-    TargetDisplay targetDisplay = new TargetDisplay();
+    //TargetDisplay targetDisplay = new TargetDisplay();
     InfoPanel infoPanel = new InfoPanel();
 
     //
@@ -84,7 +84,7 @@ public partial class MainWindow : Window, IDisposable
 
         SetupItemsTab();
         SetupFlagsTab();
-
+        targetDisplays.Add(new TargetDisplay());
     }
 
     void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -120,7 +120,7 @@ public partial class MainWindow : Window, IDisposable
 
     void WindowClosed(object sender, EventArgs e)
     {
-        targetDisplay.Close();
+        //targetDisplay.Close();
         infoPanel.Close();
         //eventLog.Close();
         Dispose();
@@ -512,12 +512,12 @@ public partial class MainWindow : Window, IDisposable
     private void showTargetDisplay(object sender, RoutedEventArgs e)
     {
         _process.installTargetHook();
-        targetDisplay.Show();
-        targetDisplay.Topmost = (bool)chkTargetDisplayOnTop.IsChecked;
+        targetDisplays[0].Show(); // display showing what you're currently targetting should always be element 0 in the array
+        targetDisplays[0].Topmost = (bool)chkTargetDisplayOnTop.IsChecked;
     }
     private void hideTargetDisplay(object sender, RoutedEventArgs e)
     {
-        targetDisplay.Hide();
+        targetDisplays[0].Hide();
     }
 
     //
@@ -530,12 +530,17 @@ public partial class MainWindow : Window, IDisposable
 
     private void TargetDisplay_TopOn(object sender, RoutedEventArgs e)
     {
-        targetDisplay.Topmost = true;
+        try { targetDisplays[0].Topmost = true; }
+        catch { }
+        // don't care just stfu
     }
 
     private void TargetDisplay_TopOff(object sender, RoutedEventArgs e)
     {
-        targetDisplay.Topmost = false;
+        try { targetDisplays[0].Topmost = false;  }
+        catch { }
+        // don't care just stfu
+        
     }
 
     //
@@ -544,22 +549,18 @@ public partial class MainWindow : Window, IDisposable
 
     private void uiTimer_Tick(object sender, EventArgs e)
     {
-        if (targetDisplay.Visibility == Visibility.Visible)
-        {
-            UpdateTargetDisplay();
-        }
-
         if (infoPanel.Visibility == Visibility.Visible)
         {
             UpdateInfoPanel();
         }
 
-        if (targetDisplays.Count > 0)
+        if (targetDisplays.Count > 1 || targetDisplays[0].Visibility == Visibility.Visible)
         {
             updateEntityViews();
         }
     }
 
+    /*
     void UpdateTargetDisplay()
     {
         //if hp is not valid, then data is nonsense
@@ -645,12 +646,14 @@ public partial class MainWindow : Window, IDisposable
                 targetDisplay.barSleep.Maximum = 1;
             }
         }
-    }
+    }*/
 
     void updateEntityViews()
     {
         foreach (TargetDisplay target in targetDisplays)
         {
+            if (target.Visibility != Visibility.Visible) { continue; }
+
             //if hp is not valid, then data is nonsense
             IntPtr pointer = target.getPointer();
             double statCurrent = _process.getEntityStats(pointer, ERLink.TargetStats.HP);
