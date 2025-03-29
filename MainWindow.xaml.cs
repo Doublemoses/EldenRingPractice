@@ -452,7 +452,7 @@ public partial class MainWindow : Window, IDisposable
 
     void setupEnemyTab()
     {
-        _process.populateEntityList(listboxEntityList);
+        _process.populateEntityList(listviewEntityList);
     }
 
     void SetupSavesTab()
@@ -546,9 +546,15 @@ public partial class MainWindow : Window, IDisposable
     //
     // UI Timer
     //
-
     private void uiTimer_Tick(object sender, EventArgs e)
     {
+        if ( tabBase.SelectedIndex == (int)TabItems.ENEMY)
+        {
+            _process.updateEntityList();
+            //listviewEntityList.BindingGroup 
+            listviewEntityList.ItemsSource = _process.entityList;
+        }
+
         if (infoPanel.Visibility == Visibility.Visible)
         {
             UpdateInfoPanel();
@@ -559,94 +565,6 @@ public partial class MainWindow : Window, IDisposable
             updateEntityViews();
         }
     }
-
-    /*
-    void UpdateTargetDisplay()
-    {
-        //if hp is not valid, then data is nonsense
-        double statCurrent = _process.getTargetStats(ERLink.TargetStats.HP);
-
-        if (statCurrent > -1)
-        {
-            double statMax = _process.getTargetStats(ERLink.TargetStats.HP_MAX);
-            targetDisplay.textHP.Text = $"{(int)statCurrent}/{(int)statMax}";
-            targetDisplay.barHP.Value = statCurrent;
-            targetDisplay.barHP.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.POISE);
-            statMax = _process.getTargetStats(ERLink.TargetStats.POISE_MAX);
-            double poiseTimer = _process.getTargetStats(ERLink.TargetStats.POISE_TIMER);
-            targetDisplay.textPoise.Text = $"({poiseTimer:F1})s {statCurrent:F1}/{(int)statMax}";
-            targetDisplay.barPoise.Value = statCurrent; // 'NaN' is not a valid value for property 'Value'. | Figure out why this happened.
-            targetDisplay.barPoise.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.BLEED);
-            statMax = _process.getTargetStats(ERLink.TargetStats.BLEED_MAX);
-            targetDisplay.textBleed.Text = $"{(int)statCurrent}/{(int)statMax}";
-            targetDisplay.barBleed.Value = statCurrent;
-            targetDisplay.barBleed.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.FROST);
-            statMax = _process.getTargetStats(ERLink.TargetStats.FROST_MAX);
-            targetDisplay.textFrost.Text = $"{(int)statCurrent}/{(int)statMax}";
-            targetDisplay.barFrost.Value = statCurrent;
-            targetDisplay.barFrost.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.ROT);
-            statMax = _process.getTargetStats(ERLink.TargetStats.ROT_MAX);
-            targetDisplay.textRot.Text = $"{(int)statCurrent}/{(int)statMax}";
-            targetDisplay.barRot.Value = statCurrent;
-            targetDisplay.barRot.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.POISON);
-            statMax = _process.getTargetStats(ERLink.TargetStats.POISON_MAX);
-            targetDisplay.textPoison.Text = $"{(int)statCurrent}/{(int)statMax}";
-            targetDisplay.barPoison.Value = statCurrent;
-            targetDisplay.barPoison.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.SLEEP);
-            statMax = _process.getTargetStats(ERLink.TargetStats.SLEEP_MAX);
-            targetDisplay.textSleep.Text = $"{(int)statCurrent}/{(int)statMax}";
-            targetDisplay.barSleep.Value = statCurrent;
-            targetDisplay.barSleep.Maximum = statMax;
-
-            statCurrent = _process.getTargetStats(ERLink.TargetStats.ANIMATION);
-            targetDisplay.textCurrentAnimation.Text = statCurrent.ToString();
-        }
-        else
-        {
-            if (targetDisplay.textHP.Text != "N/A")
-            {
-                targetDisplay.textHP.Text = "N/A";
-                targetDisplay.barHP.Maximum = 1;
-                targetDisplay.barHP.Value = 1;
-
-                targetDisplay.textPoise.Text = "N/A";
-                targetDisplay.barPoise.Value = 1;
-                targetDisplay.barPoise.Maximum = 1;
-
-                targetDisplay.textBleed.Text = "N/A";
-                targetDisplay.barBleed.Value = 1;
-                targetDisplay.barBleed.Maximum = 1;
-
-                targetDisplay.textFrost.Text = "N/A";
-                targetDisplay.barFrost.Value = 1;
-                targetDisplay.barFrost.Maximum = 1;
-
-                targetDisplay.textRot.Text = "N/A";
-                targetDisplay.barRot.Value = 1;
-                targetDisplay.barRot.Maximum = 1;
-
-                targetDisplay.textPoison.Text = "N/A";
-                targetDisplay.barPoison.Value = 1;
-                targetDisplay.barPoison.Maximum = 1;
-
-                targetDisplay.textSleep.Text = "N/A";
-                targetDisplay.barSleep.Value = 1;
-                targetDisplay.barSleep.Maximum = 1;
-            }
-        }
-    }*/
 
     void updateEntityViews()
     {
@@ -1088,7 +1006,6 @@ public partial class MainWindow : Window, IDisposable
 
     private void openNewTargetWindow(object sender, RoutedEventArgs e)
     {
-        //MessageBox.Show(((IntPtr)listboxEntityList.SelectedItem).ToString("X16"));
-        targetDisplays.Add(new TargetDisplay((IntPtr)listboxEntityList.SelectedItem, true));
+        targetDisplays.Add(new TargetDisplay(_process.getEntityAddress(listviewEntityList.SelectedIndex), true));
     }
 }

@@ -13,18 +13,21 @@ using System.Net.Http.Headers;
 using Microsoft.VisualBasic.FileIO;
 using System.Windows.Controls;
 using System.Reflection;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace EldenRingPractice
 {
     public class ERLink : IDisposable
     {
-        //public const uint PROCESS_ALL_ACCESS = 2035711;             // FIGURE OUT WHAT THIS IS
         public const uint PROCESS_ALL_ACCESS = 0x1F0FFF;
         const string erProcessName = "eldenring";
         private Process _erProcess = null;
         private IntPtr _erProcessHandle = IntPtr.Zero;
         public IntPtr erBaseAddress = IntPtr.Zero;
         int erSize = 0;
+        public ObservableCollection<entityData> entityList = new ObservableCollection<entityData>();
 
         public bool linkActive = false;
 
@@ -1308,46 +1311,63 @@ namespace EldenRingPractice
             return buffer;
         }
 
-
-
-
-
-
-        List<IntPtr> entityList = new List<IntPtr>();
-
         public void getEntityList()
         {
             IntPtr p = erBaseAddress + entityListBase;
 
             var q = ReadUInt64(p + 24 + (IntPtr)ReadUInt32(p + 19));
-
-
-            //MessageBox.Show((p + 24).ToString("X16"));
-
             var start = ReadUInt64((IntPtr)q + 0x1F1B8);
             var end = ReadUInt64((IntPtr)q + 0x1F1C0);
-            //MessageBox.Show(start.ToString("X16") + " | " + end.ToString("X16"));
-            //MessageBox.Show(ReadUInt64((IntPtr)start).ToString("X16"));
-
             int count = (int)(end - start) / 8;
+
+            entityList.Clear();
 
             for (int i = 0; i < count; i++)
             {
-                entityList.Add((IntPtr)ReadUInt64((IntPtr)start + i * 8));
-                //MessageBox.Show(i.ToString() + " " + entityList[i].ToString("X16"));
+                entityList.Add(new entityData { address = (IntPtr)ReadUInt64((IntPtr)start + i * 8) });
             }
-
-            //int entityListStart = ReadUInt64()
-            //entityListBas2
         }
 
-        public bool populateEntityList(ListBox listbox)
+        public void updateEntityList()
+        {
+            foreach (entityData entry in entityList)
+            {
+                entry.health = (int)getEntityStats(entry.address, TargetStats.HP_MAX);
+            }
+        }
+
+        public bool populateEntityList(ListView listview)
         {
             getEntityList();
 
-            listbox.ItemsSource = entityList;
+            listview.ItemsSource = entityList;
 
             return false;
         }
+
+        public IntPtr getEntityAddress(int index)
+        {
+            return entityList[index].address;
+        }
+    }
+
+    public class entityData
+    {
+
+        //public event PropertyChangedEventHandler PropertyChanged;
+
+        public IntPtr address { get; set; }
+        public int id { get; set; }
+        public int health { get; set; }
+        public int animation { get; set; }
+        public float x { get; set; }
+        public float y { get; set; }
+        public float z { get; set; }
+        public float distance { get; set; }
+
+        //protected void OnPropertyChanged([CallerMemberName] string name = null)
+        //{
+        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        //}
     }
 }

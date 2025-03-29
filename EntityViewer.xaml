@@ -1,0 +1,23 @@
+﻿<Window x:Class="EldenRingPractice.EntityViewer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EldenRingPractice"
+        mc:Ignorable="d"
+        Title="EntityViewer" Height="450" Width="800">
+    <Grid>
+        <ListView d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,10,10,64">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Id"/>
+                    <GridViewColumn Header="Health"/>
+                    <GridViewColumn Header="Animation"/>
+                    <GridViewColumn Header="Position"/>
+                    <GridViewColumn Header="Distance"/>
+                    <GridViewColumn Header="Address"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>

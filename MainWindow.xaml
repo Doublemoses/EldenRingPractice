@@ -115,14 +115,19 @@
 
             <TabItem Header="Enemy">
                 <Grid Background="#FFFFFFFF">
-                    <Button Content="New Target Window" HorizontalAlignment="Left" Margin="39,199,0,0" VerticalAlignment="Top" Width="194" Click="openNewTargetWindow"/>
-                    <ListBox x:Name="listboxEntityList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="43,10,187,242">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding StringFormat={}{0:x}}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <Button Content="New Target Window" HorizontalAlignment="Left" Margin="10,362,0,0" VerticalAlignment="Top" Width="194" Click="openNewTargetWindow"/>
+                    <ListView x:Name="listviewEntityList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,10,10,68">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Path=id}"/>
+                                <GridViewColumn Header="Health" DisplayMemberBinding="{Binding Path=health}"/>
+                                <GridViewColumn Header="Animation" DisplayMemberBinding="{Binding Path=animation}"/>
+                                <GridViewColumn Header="Position" DisplayMemberBinding="{Binding Path=position}"/>
+                                <GridViewColumn Header="Distance" DisplayMemberBinding="{Binding Path=distance}"/>
+                                <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Path=address, StringFormat={}{0:x}}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </Grid>
             </TabItem>
 
